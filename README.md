@@ -1,106 +1,168 @@
-# Student Management CLI — Code Review
+# 📚 Student Management CLI
 
-## Overview
-
-Three files reviewed: `Main.java`, `Student.java`, `StudentManager.java`
-
-Overall the code is well-structured and follows a clean MVC pattern. Found **2 bugs** and **1 minor issue**.
+A simple command-line application built in **Java** to manage student records. Supports adding, removing, updating, searching, and listing students — all from the terminal.
 
 ---
 
-## 🔴 Bug 1 — Wrong setter called in `updateStudentCourse()`
+## 🗂️ Project Structure
 
-**File:** `StudentManager.java` — Line 38
-
-```java
-// WRONG
-public boolean updateStudentCourse(int id, String course){
-    Student s = findById(id);
-    if(s != null){
-        s.setName(course);   // ❌ setName() called instead of setCourse()
-        return true;
-    }else{
-        return false;
-    }
-}
 ```
-
-```java
-// CORRECT
-public boolean updateStudentCourse(int id, String course){
-    Student s = findById(id);
-    if(s != null){
-        s.setCourse(course);   // ✅
-        return true;
-    }else{
-        return false;
-    }
-}
+StudentManagement/
+│
+├── Main.java            # Entry point — handles CLI menu and user input
+├── Student.java         # Student model — fields, constructor, getters & setters
+└── StudentManager.java  # Business logic — all CRUD operations on student list
 ```
-
-**Impact:** Updating a student's course would silently overwrite their name instead. The bug would be hard to notice since the method returns `true` (success) either way.
 
 ---
 
-## 🔴 Bug 2 — Missing prompt in `getStudent()`
+## ⚙️ Features
 
-**File:** `Main.java`
-
-```java
-// WRONG — no prompt before reading input
-static void getStudent(){
-    int id = sc.nextInt();   // ❌ user doesn't know what to type
-    sc.nextLine();
-    ...
-}
-```
-
-```java
-// CORRECT
-static void getStudent(){
-    System.out.println("Enter the ID of the student you wish to fetch");   // ✅
-    int id = sc.nextInt();
-    sc.nextLine();
-    ...
-}
-```
-
-**Impact:** The program just freezes waiting for input with no message on screen. Bad user experience.
+| # | Feature | Description |
+|---|---|---|
+| 1 | Add Student | Add a new student with ID, age, name, and course |
+| 2 | Remove Student | Delete a student by their ID |
+| 3 | Update Student | Update a student's name or course by ID |
+| 4 | Get Student | Fetch and display details of a single student by ID |
+| 5 | Get All Students | Display details of all students |
+| 6 | Exit | Quit the application |
 
 ---
 
-## 🟡 Minor — Missing `sc.nextLine()` after menu choice read
+## 🧱 Class Breakdown
 
-**File:** `Main.java` — inside `main()`
+### `Student.java` — Model
+Represents a single student object.
 
-```java
-// Current
-int option = sc.nextInt();   // leftover \n stays in buffer
+- Fields: `id`, `age`, `name`, `course`
+- Constructor to initialize all fields
+- Getters and setters for all fields
 
-// Better
-int option = sc.nextInt();
-sc.nextLine();               // consume leftover newline
-```
+### `StudentManager.java` — Controller
+Handles all operations on the student list.
 
-**Impact:** Low risk here since the next reads are also `nextInt()`, but it's a good habit to always flush the buffer after every `nextInt()` call.
+- `addNewStudent()` — adds student, rejects duplicate IDs
+- `removeStudentById()` — removes student by ID
+- `updateStudentName()` — updates name by ID
+- `updateStudentCourse()` — updates course by ID
+- `getStudentInfo()` — prints details of one student
+- `getAllStudentInfo()` — prints details of all students
+- `findById()` — private helper to locate a student by ID
+
+### `Main.java` — View
+Handles everything the user sees and interacts with.
+
+- Displays the menu in a loop until Exit is chosen
+- Reads user input using `Scanner`
+- Calls the appropriate method on `StudentManager`
+- Displays success or error messages based on the result
 
 ---
 
-## ✅ What's Correct
+## 🚀 How to Run
 
-| File | Status |
+### Prerequisites
+- Java JDK 8 or above installed
+- A terminal / command prompt
+
+### Steps
+
+**1. Clone or download the project**
+```bash
+git clone https://github.com/RKKK7/student-management-cli
+cd student-management-cli
+```
+
+**2. Compile all Java files**
+```bash
+javac *.java
+```
+
+**3. Run the application**
+```bash
+java Main
+```
+
+> If using a package (e.g. `org.example` in IntelliJ), compile and run from the project root via your IDE's Run button.
+
+---
+
+## 🖥️ Usage Example
+
+```
+           WELCOME STUDENT MANAGEMENT CLI
+1. Add a student
+2. remove a student
+3. Update student details
+4. Get a student details
+5. Get all student details
+6. Exit
+```
+
+**Adding a student:**
+```
+Enter Student Id
+101
+Enter Student age
+20
+Enter Student name
+Ravi Kumar
+Enter Student course
+AIML
+student added successfully
+```
+
+**Fetching a student:**
+```
+Enter the ID of the student you wish to fetch
+101
+ student ID: 101
+ student Name: Ravi Kumar
+ student Age: 20
+ student Course: AIML
+ student details of iD 101 fetched successfully
+```
+
+**Updating a student:**
+```
+what would you like to update?
+1. Name
+2. course
+1
+Enter the id of the student
+101
+Enter the name
+Ravi K
+Student with ID 101 updated successfully
+```
+
+---
+
+## 🏗️ Design Pattern
+
+This project follows a simplified **MVC (Model-View-Controller)** pattern:
+
+| Class | Role |
 |---|---|
-| `Student.java` — fields, constructor, all getters & setters | ✅ Correct |
-| `StudentManager.java` — `addNewStudent()` with duplicate ID check | ✅ Correct |
-| `StudentManager.java` — `removeStudentById()` | ✅ Correct |
-| `StudentManager.java` — `updateStudentName()` | ✅ Correct |
-| `StudentManager.java` — `getStudentInfo()` | ✅ Correct |
-| `StudentManager.java` — `getAllStudentInfo()` with empty check | ✅ Correct |
-| `StudentManager.java` — `findById()` helper | ✅ Correct |
-| `Main.java` — `addStudent()` with `sc.nextLine()` after `nextInt()` | ✅ Correct |
-| `Main.java` — `removeStudent()` | ✅ Correct |
-| `Main.java` — `updateStudent()` with sub-menu | ✅ Correct |
-| `Main.java` — `getAllStudent()` | ✅ Correct |
-| `Main.java` — Exit with break | ✅ Correct |
+| `Student.java` | **Model** — data container |
+| `StudentManager.java` | **Controller** — business logic |
+| `Main.java` | **View** — user interface |
+
+This separation keeps the code clean and maintainable. If you wanted to swap the CLI for a GUI later, only `Main.java` would need to change.
 
 ---
+
+## 📌 Notes
+
+- Data is stored **in memory only** — records are lost when the program exits
+- Duplicate student IDs are not allowed
+- No external libraries used — pure Java only
+
+---
+
+## 👨‍💻 Author
+
+**Ravi Kumar**
+Computer Science Student — AMC Engineering College
+USN: 1AM22CS164
+GitHub: [@RKKK7](https://github.com/RKKK7)
